@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "bi-copilot": {
+      "command": "python",
+      "args": ["-m", "mcp_server.server"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DATABASE_PATH": "./data/database.duckdb",
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    }
+  }
+}

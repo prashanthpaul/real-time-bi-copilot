@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+.Python
+env/
+venv/
+.venv/
+
+# Environment
+.env
+.env.local
+
+# Database
+*.duckdb
+*.duckdb.wal
+*.db
+*.sqlite3
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Docker
+.docker/
+
+# Logs
+*.log
+logs/
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Distribution
+*.tar.gz
+*.whl
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data (keep sample, ignore large files)
+data/*.parquet
+data/*.duckdb
+data/*.duckdb.wal
+!data/sample_data_generator.py

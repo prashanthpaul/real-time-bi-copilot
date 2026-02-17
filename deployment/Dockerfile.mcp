@@ -1,0 +1,18 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY mcp-server/ ./mcp-server/
+COPY data/ ./data/
+COPY .env.example .env
+
+ENV PYTHONPATH=/app
+ENV DATABASE_PATH=./data/database.duckdb
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import duckdb; duckdb.connect('./data/database.duckdb').execute('SELECT 1')" || exit 1
+
+ENTRYPOINT ["python", "-m", "mcp_server.server"]

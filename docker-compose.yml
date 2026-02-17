@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  mcp-server:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile.mcp
+    container_name: bi-copilot-mcp
+    volumes:
+      - ./data:/app/data
+      - ./.env:/app/.env:ro
+    environment:
+      - DATABASE_PATH=./data/database.duckdb
+      - PYTHONPATH=/app
+    networks:
+      - bi-copilot
+    restart: unless-stopped
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile.streamlit
+    container_name: bi-copilot-dashboard
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+      - ./.env:/app/.env:ro
+    environment:
+      - DATABASE_PATH=./data/database.duckdb
+      - PYTHONPATH=/app
+    depends_on:
+      - mcp-server
+    networks:
+      - bi-copilot
+    restart: unless-stopped
+
+networks:
+  bi-copilot:
+    driver: bridge

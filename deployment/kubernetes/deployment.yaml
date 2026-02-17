@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bi-copilot-streamlit
+  labels:
+    app: bi-copilot
+    component: dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bi-copilot
+      component: dashboard
+  template:
+    metadata:
+      labels:
+        app: bi-copilot
+        component: dashboard
+    spec:
+      containers:
+        - name: streamlit
+          image: bi-copilot-streamlit:latest
+          ports:
+            - containerPort: 8501
+          env:
+            - name: DATABASE_PATH
+              value: "/data/database.duckdb"
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: bi-copilot-secrets
+                  key: anthropic-api-key
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+            initialDelaySeconds: 15
+            periodSeconds: 30
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: bi-copilot-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bi-copilot-service
+spec:
+  selector:
+    app: bi-copilot
+    component: dashboard
+  ports:
+    - port: 80
+      targetPort: 8501
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bi-copilot-secrets
+type: Opaque
+data:
+  anthropic-api-key: BASE64_ENCODED_API_KEY_HERE
