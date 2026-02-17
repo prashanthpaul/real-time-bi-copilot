@@ -14,8 +14,7 @@ project_root = str(Path(__file__).parent.parent.parent)
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from mcp_server.utils.db_connector import DatabaseConnector
-from mcp_server.config import settings
+from mcp_server.utils.db_connector import create_connector
 
 st.set_page_config(page_title="Data Explorer | BI Copilot", page_icon="🔍", layout="wide")
 st.title("🔍 Data Explorer")
@@ -23,7 +22,7 @@ st.title("🔍 Data Explorer")
 # --- Initialize DB ---
 @st.cache_resource
 def get_db():
-    return DatabaseConnector(settings.resolve_database_path())
+    return create_connector()
 
 try:
     db = get_db()
@@ -49,7 +48,7 @@ with col1:
     st.subheader("Schema")
     schema = db.get_schema(selected)
     schema_df = pd.DataFrame(schema)
-    st.dataframe(schema_df, use_container_width=True, hide_index=True)
+    st.dataframe(schema_df, width="stretch", hide_index=True)
 
     # Row count
     count_result = db.execute_query(f"SELECT COUNT(*) FROM {selected}")
@@ -65,7 +64,7 @@ with col2:
         return _db.execute_query_df(f"SELECT * FROM {table} LIMIT {lim}")
 
     preview_df = load_preview(db, selected, limit)
-    st.dataframe(preview_df, use_container_width=True, hide_index=True)
+    st.dataframe(preview_df, width="stretch", hide_index=True)
 
 # --- Column Statistics ---
 st.divider()
@@ -84,7 +83,7 @@ tab1, tab2, tab3 = st.tabs(["Numeric Stats", "Categorical Stats", "Null Analysis
 
 with tab1:
     if numeric_cols:
-        st.dataframe(df[numeric_cols].describe().round(2), use_container_width=True)
+        st.dataframe(df[numeric_cols].describe().round(2), width="stretch")
     else:
         st.info("No numeric columns in this table.")
 
@@ -105,7 +104,7 @@ with tab3:
             "Null Count": null_counts.values,
             "Null %": (null_counts.values / len(df) * 100).round(2),
         })
-        st.dataframe(null_df, use_container_width=True, hide_index=True)
+        st.dataframe(null_df, width="stretch", hide_index=True)
     else:
         st.success("No null values found.")
 

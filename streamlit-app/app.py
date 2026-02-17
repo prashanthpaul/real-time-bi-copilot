@@ -43,11 +43,11 @@ with st.sidebar:
     st.divider()
 
     st.markdown("### Navigation")
-    st.page_link("streamlit-app/app.py", label="Home", icon="🏠")
-    st.page_link("streamlit-app/pages/01_data_explorer.py", label="Data Explorer", icon="🔍")
-    st.page_link("streamlit-app/pages/02_query_interface.py", label="Query Interface", icon="💬")
-    st.page_link("streamlit-app/pages/03_insights_dashboard.py", label="Insights Dashboard", icon="💡")
-    st.page_link("streamlit-app/pages/04_system_health.py", label="System Health", icon="🩺")
+    st.page_link("app.py", label="Home", icon="🏠")
+    st.page_link("pages/01_data_explorer.py", label="Data Explorer", icon="🔍")
+    st.page_link("pages/02_query_interface.py", label="Query Interface", icon="💬")
+    st.page_link("pages/03_insights_dashboard.py", label="Insights Dashboard", icon="💡")
+    st.page_link("pages/04_system_health.py", label="System Health", icon="🩺")
 
     st.divider()
     st.caption("Powered by MCP + Claude AI")
@@ -88,10 +88,9 @@ VS Code / Claude Desktop
 col1, col2, col3 = st.columns(3)
 
 try:
-    from mcp_server.utils.db_connector import DatabaseConnector
-    from mcp_server.config import settings
+    from mcp_server.utils.db_connector import create_connector
 
-    db = DatabaseConnector(settings.resolve_database_path())
+    db = create_connector()
     tables = db.get_tables()
 
     with col1:

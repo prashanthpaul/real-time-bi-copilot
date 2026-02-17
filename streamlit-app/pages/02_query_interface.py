@@ -16,7 +16,7 @@ project_root = str(Path(__file__).parent.parent.parent)
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from mcp_server.utils.db_connector import DatabaseConnector
+from mcp_server.utils.db_connector import create_connector
 from mcp_server.utils.ai_client import AIClient
 from mcp_server.config import settings
 from mcp_server.resources.query_history import query_history
@@ -27,7 +27,7 @@ st.title("💬 Query Interface")
 # --- Initialize ---
 @st.cache_resource
 def get_db():
-    return DatabaseConnector(settings.resolve_database_path())
+    return create_connector()
 
 @st.cache_resource
 def get_ai():
@@ -105,7 +105,7 @@ if run and query.strip():
         st.success(f"Returned {result['row_count']} rows in {result['execution_time_ms']}ms")
 
         df = pd.DataFrame(result["rows"], columns=result["columns"])
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        st.dataframe(df, width="stretch", hide_index=True)
 
         # Quick visualization
         numeric_cols = df.select_dtypes(include=["number"]).columns.tolist()
@@ -122,7 +122,7 @@ if run and query.strip():
             elif chart_type == "Scatter":
                 import plotly.express as px
                 fig = px.scatter(df, x=x_col, y=y_col, template="plotly_dark")
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
 
         # Download
         csv = df.to_csv(index=False)
@@ -141,7 +141,7 @@ else:
     st.caption("No queries executed yet.")
 
 
-def _build_schema_info(db: DatabaseConnector) -> str:
+def _build_schema_info(db) -> str:
     """Build schema info string for AI."""
     tables = db.get_tables()
     views = db.get_views()
