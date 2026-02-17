@@ -14,7 +14,7 @@ project_root = str(Path(__file__).parent.parent.parent)
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from mcp_server.utils.db_connector import DatabaseConnector
+from mcp_server.utils.db_connector import create_connector
 from mcp_server.config import settings
 from mcp_server.resources.query_history import query_history
 
@@ -26,20 +26,25 @@ st.subheader("Database")
 col1, col2, col3 = st.columns(3)
 
 try:
-    db = DatabaseConnector(settings.resolve_database_path())
+    db = create_connector()
     tables = db.get_tables()
     views = db.get_views()
     total_rows = sum(t["row_count"] for t in tables)
+    backend = db.get_backend_name()
 
     with col1:
         st.metric("Status", "Connected")
-        st.success(f"Path: {settings.resolve_database_path()}")
+        st.success(f"Backend: **{backend}**")
+        if backend == "DuckDB":
+            st.caption(f"Path: {settings.resolve_database_path()}")
+        else:
+            st.caption(f"Account: {settings.snowflake_account}")
     with col2:
         st.metric("Tables", len(tables))
         st.metric("Views", len(views))
     with col3:
         st.metric("Total Rows", f"{total_rows:,}")
-        st.metric("Type", settings.database_type.upper())
+        st.metric("Type", backend)
 
     # Table details
     with st.expander("Table Details"):

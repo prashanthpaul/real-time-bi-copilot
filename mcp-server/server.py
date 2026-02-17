@@ -38,7 +38,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from mcp_server.config import settings
-from mcp_server.utils.db_connector import DatabaseConnector
+from mcp_server.utils.db_connector import create_connector
 from mcp_server.utils.ai_client import AIClient
 from mcp_server.tools.query_database import query_database, TOOL_DEFINITION as QUERY_TOOL
 from mcp_server.tools.analyze_data import analyze_data, TOOL_DEFINITION as ANALYZE_TOOL
@@ -58,7 +58,7 @@ logger = logging.getLogger("bi-copilot-mcp")
 
 # --- Initialize services ---
 db_path = settings.resolve_database_path()
-db = DatabaseConnector(db_path)
+db = create_connector()
 
 ai = None
 if settings.anthropic_api_key:
@@ -227,7 +227,7 @@ async def handle_get_prompt(name: str, arguments: dict | None = None) -> GetProm
 async def main():
     """Start the MCP server with stdio transport."""
     logger.info("Starting BI Copilot MCP Server...")
-    logger.info(f"Database: {db_path}")
+    logger.info(f"Database: {db.get_backend_name()} ({db_path})")
     logger.info(f"AI enabled: {ai is not None}")
     logger.info(f"Transport: stdio")
 
