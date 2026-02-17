@@ -236,7 +236,7 @@ class SnowflakeConnector(BaseDatabaseConnector):
             else:
                 cursor.execute(sql)
 
-            columns = [desc[0] for desc in cursor.description] if cursor.description else []
+            columns = [desc[0].lower() for desc in cursor.description] if cursor.description else []
             rows = cursor.fetchall()
             elapsed = round((time.time() - start) * 1000, 2)
 
@@ -261,7 +261,7 @@ class SnowflakeConnector(BaseDatabaseConnector):
         self._ensure_connected()
         cursor = self._conn.cursor()
         cursor.execute(sql)
-        columns = [desc[0] for desc in cursor.description]
+        columns = [desc[0].lower() for desc in cursor.description]
         rows = cursor.fetchall()
         return pd.DataFrame(rows, columns=columns)
 
