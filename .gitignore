@@ -25,7 +25,8 @@ venv/
 
 # IDE
 .idea/
-.vscode/
+.vscode/*
+!.vscode/mcp.json
 *.swp
 *.swo
 *~
@@ -52,6 +53,10 @@ htmlcov/
 # Distribution
 *.tar.gz
 *.whl
+
+# Symlinks (dev convenience — not needed in production)
+mcp_server
+streamlit_app
 
 # Jupyter
 .ipynb_checkpoints/

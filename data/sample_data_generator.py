@@ -40,7 +40,7 @@ SUBCATEGORIES = {
     "Software": ["Licenses", "SaaS Subscriptions", "Custom Development", "Support Plans"],
     "Services": ["Consulting", "Training", "Implementation", "Managed Services"],
     "Hardware": ["Servers", "Storage", "Peripherals", "Components"],
-    "Cloud Infrastructure": ["Compute", "Storage", "Database", "AI/ML Services"],
+    "Cloud Infrastructure": ["Compute", "Cloud Storage", "Database", "AI/ML Services"],
 }
 
 PRODUCTS = {
@@ -61,7 +61,7 @@ PRODUCTS = {
     "Peripherals": ["Docking Station", "KVM Switch", "UPS 1500VA", "Label Printer"],
     "Components": ["RAM 32GB", "SSD 1TB", "CPU Xeon", "GPU Tesla"],
     "Compute": ["EC2 Instance", "Lambda Function", "Container Service", "Batch Processing"],
-    "Storage": ["S3 Bucket", "Block Storage", "Archive Storage", "CDN Distribution"],
+    "Cloud Storage": ["S3 Bucket", "Block Storage", "Archive Storage", "CDN Distribution"],
     "Database": ["SQL Managed", "NoSQL Service", "Cache Cluster", "Data Lake"],
     "AI/ML Services": ["Model Training", "Inference API", "AutoML Pipeline", "Vision Service"],
 }

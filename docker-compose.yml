@@ -10,7 +10,6 @@ services:
       - ./data:/app/data
       - ./.env:/app/.env:ro
     environment:
-      - DATABASE_PATH=./data/database.duckdb
       - PYTHONPATH=/app
     networks:
       - bi-copilot
@@ -27,10 +26,7 @@ services:
       - ./data:/app/data
       - ./.env:/app/.env:ro
     environment:
-      - DATABASE_PATH=./data/database.duckdb
       - PYTHONPATH=/app
-    depends_on:
-      - mcp-server
     networks:
       - bi-copilot
     restart: unless-stopped

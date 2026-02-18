@@ -31,8 +31,13 @@ except Exception as e:
     st.stop()
 
 # --- Table Selector ---
-tables = db.get_tables()
-views = db.get_views()
+try:
+    tables = db.get_tables()
+    views = db.get_views()
+except Exception as e:
+    st.error(f"Failed to list tables: {e}")
+    st.stop()
+
 all_datasets = [t["name"] for t in tables] + views
 
 if not all_datasets:
@@ -46,35 +51,40 @@ col1, col2 = st.columns([1, 2])
 
 with col1:
     st.subheader("Schema")
-    schema = db.get_schema(selected)
-    schema_df = pd.DataFrame(schema)
-    st.dataframe(schema_df, width="stretch", hide_index=True)
+    try:
+        schema = db.get_schema(selected)
+        schema_df = pd.DataFrame(schema)
+        st.dataframe(schema_df, use_container_width=True, hide_index=True)
+    except Exception as e:
+        st.error(f"Schema error: {e}")
 
     # Row count
-    count_result = db.execute_query(f"SELECT COUNT(*) FROM {selected}")
-    if count_result.get("rows"):
-        st.metric("Row Count", f"{count_result['rows'][0][0]:,}")
+    try:
+        count_result = db.execute_query(f"SELECT COUNT(*) FROM {selected}")
+        if count_result.get("rows"):
+            st.metric("Row Count", f"{count_result['rows'][0][0]:,}")
+    except Exception as e:
+        st.error(f"Count error: {e}")
 
 with col2:
     st.subheader("Data Preview")
     limit = st.slider("Preview rows", 5, 100, 10)
 
-    @st.cache_data(ttl=60)
-    def load_preview(_db, table, lim):
-        return _db.execute_query_df(f"SELECT * FROM {table} LIMIT {lim}")
-
-    preview_df = load_preview(db, selected, limit)
-    st.dataframe(preview_df, width="stretch", hide_index=True)
+    try:
+        preview_df = db.execute_query_df(f"SELECT * FROM {selected} LIMIT {limit}")
+        st.dataframe(preview_df, use_container_width=True, hide_index=True)
+    except Exception as e:
+        st.error(f"Preview error: {e}")
 
 # --- Column Statistics ---
 st.divider()
 st.subheader("Column Statistics")
 
-@st.cache_data(ttl=120)
-def load_full_data(_db, table):
-    return _db.execute_query_df(f"SELECT * FROM {table}")
-
-df = load_full_data(db, selected)
+try:
+    df = db.execute_query_df(f"SELECT * FROM {selected}")
+except Exception as e:
+    st.error(f"Failed to load data for statistics: {e}")
+    st.stop()
 
 numeric_cols = df.select_dtypes(include=["number"]).columns.tolist()
 categorical_cols = df.select_dtypes(include=["object"]).columns.tolist()
@@ -83,7 +93,7 @@ tab1, tab2, tab3 = st.tabs(["Numeric Stats", "Categorical Stats", "Null Analysis
 
 with tab1:
     if numeric_cols:
-        st.dataframe(df[numeric_cols].describe().round(2), width="stretch")
+        st.dataframe(df[numeric_cols].describe().round(2), use_container_width=True)
     else:
         st.info("No numeric columns in this table.")
 
@@ -104,7 +114,7 @@ with tab3:
             "Null Count": null_counts.values,
             "Null %": (null_counts.values / len(df) * 100).round(2),
         })
-        st.dataframe(null_df, width="stretch", hide_index=True)
+        st.dataframe(null_df, use_container_width=True, hide_index=True)
     else:
         st.success("No null values found.")
 

@@ -9,6 +9,9 @@ COPY mcp-server/ ./mcp-server/
 COPY data/ ./data/
 COPY .env.example .env
 
+# Create symlinks so Python can import mcp_server (underscore) from mcp-server (hyphen)
+RUN ln -s /app/mcp-server /app/mcp_server
+
 ENV PYTHONPATH=/app
 ENV DATABASE_PATH=./data/database.duckdb
 

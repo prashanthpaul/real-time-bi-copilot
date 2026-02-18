@@ -80,7 +80,7 @@ with col1:
             labels={"month": "Month", "total_revenue": "Revenue ($)"},
         )
         fig.update_layout(height=350, hovermode="x unified")
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
 
 with col2:
     st.subheader("Revenue by Category")
@@ -90,7 +90,7 @@ with col2:
         hole=0.4, template="plotly_dark",
     )
     fig.update_layout(height=350)
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, use_container_width=True)
 
 # --- Charts Row 2 ---
 col3, col4 = st.columns(2)
@@ -110,7 +110,7 @@ with col3:
         labels={"revenue": "Revenue ($)", "product_name": "Product"},
     )
     fig.update_layout(height=400)
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, use_container_width=True)
 
 with col4:
     st.subheader("Revenue by Region")
@@ -121,7 +121,7 @@ with col4:
         labels={"revenue": "Revenue ($)", "region": "Region"},
     )
     fig.update_layout(height=400, showlegend=False)
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, use_container_width=True)
 
 # --- Daily Trends ---
 st.divider()
@@ -134,7 +134,7 @@ if not daily.empty:
         labels={"date": "Date", "transactions": "Transactions"},
     )
     fig.update_layout(height=300, hovermode="x unified")
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, use_container_width=True)
 
 # --- Channel & Segment Breakdown ---
 col5, col6 = st.columns(2)
@@ -144,11 +144,11 @@ with col5:
     channel = sales.groupby("sales_channel")["revenue"].sum().reset_index()
     fig = px.pie(channel, names="sales_channel", values="revenue", hole=0.4, template="plotly_dark")
     fig.update_layout(height=300)
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, use_container_width=True)
 
 with col6:
     st.subheader("Customer Segment Mix")
     segment = sales.groupby("customer_segment")["revenue"].sum().reset_index()
     fig = px.pie(segment, names="customer_segment", values="revenue", hole=0.4, template="plotly_dark")
     fig.update_layout(height=300)
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, use_container_width=True)

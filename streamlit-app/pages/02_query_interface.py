@@ -105,7 +105,7 @@ if run and query.strip():
         st.success(f"Returned {result['row_count']} rows in {result['execution_time_ms']}ms")
 
         df = pd.DataFrame(result["rows"], columns=result["columns"])
-        st.dataframe(df, width="stretch", hide_index=True)
+        st.dataframe(df, use_container_width=True, hide_index=True)
 
         # Quick visualization
         numeric_cols = df.select_dtypes(include=["number"]).columns.tolist()
@@ -122,7 +122,7 @@ if run and query.strip():
             elif chart_type == "Scatter":
                 import plotly.express as px
                 fig = px.scatter(df, x=x_col, y=y_col, template="plotly_dark")
-                st.plotly_chart(fig, width="stretch")
+                st.plotly_chart(fig, use_container_width=True)
 
         # Download
         csv = df.to_csv(index=False)

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "bi-copilot": {
+      "command": "python",
+      "args": ["-m", "mcp_server.server"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    }
+  }
+}

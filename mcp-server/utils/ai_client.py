@@ -26,7 +26,9 @@ class AIClient:
         self.request_count = 0
         logger.info(f"AIClient initialized with model: {model}")
 
-    def analyze(self, prompt: str, system: str = "", max_tokens: int = 4096) -> dict[str, Any]:
+    def analyze(
+        self, prompt: str, system: str = "", max_tokens: int = 4096, _retries: int = 0
+    ) -> dict[str, Any]:
         """
         Send an analysis request to Claude and return structured results.
 
@@ -38,6 +40,7 @@ class AIClient:
                 "latency_ms": float
             }
         """
+        MAX_RETRIES = 3
         start = time.time()
         try:
             messages = [{"role": "user", "content": prompt}]
@@ -74,9 +77,17 @@ class AIClient:
 
         except RateLimitError as e:
             elapsed = round((time.time() - start) * 1000, 2)
-            logger.warning(f"Rate limited after {elapsed}ms. Retrying in 60s...")
-            time.sleep(60)
-            return self.analyze(prompt, system, max_tokens)
+            if _retries >= MAX_RETRIES:
+                logger.error(f"Rate limited {MAX_RETRIES} times, giving up.")
+                return {
+                    "error": f"Rate limited after {MAX_RETRIES} retries: {e}",
+                    "type": "RateLimitError",
+                    "latency_ms": elapsed,
+                }
+            wait = 30 * (2 ** _retries)  # 30s, 60s, 120s backoff
+            logger.warning(f"Rate limited (attempt {_retries + 1}/{MAX_RETRIES}). Retrying in {wait}s...")
+            time.sleep(wait)
+            return self.analyze(prompt, system, max_tokens, _retries=_retries + 1)
 
         except APIError as e:
             elapsed = round((time.time() - start) * 1000, 2)

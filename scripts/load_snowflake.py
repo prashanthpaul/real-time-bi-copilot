@@ -113,31 +113,41 @@ def main():
     """)
     print("  Created: products")
 
-    # Load data from CSV
-    print("\n[4/5] Loading data from CSV...")
+    # Load data — regenerate from Python to get all 3 tables
+    print("\n[4/5] Loading data...")
     data_dir = Path(__file__).parent.parent / "data"
-    csv_path = data_dir / "sales_data.csv"
 
-    if not csv_path.exists():
-        print("  ERROR: sales_data.csv not found. Run sample_data_generator.py first.")
-        sys.exit(1)
+    # Generate fresh data using the sample data generator
+    sys.path.insert(0, str(data_dir))
+    from sample_data_generator import generate_customers, generate_products_catalog, generate_sales
 
-    # Stage and load
+    customers_df = generate_customers(500)
+    products_df = generate_products_catalog()
+    sales_df = generate_sales(10000, customers_df, products_df)
+
+    # Also re-export CSV for consistency
+    sales_df.to_csv(str(data_dir / "sales_data.csv"), index=False)
+
+    # Stage and load each table
     cursor.execute("CREATE OR REPLACE STAGE bi_copilot_stage")
-    cursor.execute(f"PUT file://{csv_path} @bi_copilot_stage AUTO_COMPRESS=TRUE")
-    cursor.execute("""
-        COPY INTO sales
-        FROM @bi_copilot_stage/sales_data.csv.gz
-        FILE_FORMAT = (TYPE = 'CSV' SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"')
-        ON_ERROR = 'CONTINUE'
-    """)
-    result = cursor.fetchone()
-    print(f"  Loaded sales: {result}")
 
-    # Verify row counts
-    cursor.execute("SELECT COUNT(*) FROM sales")
-    count = cursor.fetchone()[0]
-    print(f"  Sales rows: {count:,}")
+    for table_name, df in [("sales", sales_df), ("customers", customers_df), ("products", products_df)]:
+        csv_path = data_dir / f"{table_name}_upload.csv"
+        df.to_csv(str(csv_path), index=False)
+        cursor.execute(f"TRUNCATE TABLE IF EXISTS {table_name}")
+        cursor.execute(f"PUT file://{csv_path.absolute()} @bi_copilot_stage AUTO_COMPRESS=TRUE OVERWRITE=TRUE")
+        cursor.execute(f"""
+            COPY INTO {table_name}
+            FROM @bi_copilot_stage/{table_name}_upload.csv.gz
+            FILE_FORMAT = (TYPE = 'CSV' SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"')
+            ON_ERROR = 'ABORT_STATEMENT'
+        """)
+        result = cursor.fetchone()
+        cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+        count = cursor.fetchone()[0]
+        print(f"  {table_name}: {count:,} rows loaded")
+        # Clean up temp CSV
+        csv_path.unlink(missing_ok=True)
 
     # Create views
     print("\n[5/5] Creating analytics views...")
